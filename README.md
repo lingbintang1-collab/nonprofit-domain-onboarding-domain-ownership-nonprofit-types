@@ -6,9 +6,9 @@ npm install
 npm run onboard
 ```
 
-I threw this backend step together in a couple of evenings to sit behind a Next.js onboarding form. Infrai gives the DNS check and user lookup one API surface: the same `INFRAI_API_KEY` and base URL handle both capability groups, so the flow never grabs a second credential midway.
+This is the backend step I would put behind a Next.js onboarding form. Infrai gives the DNS check and user lookup one API surface: the same `INFRAI_API_KEY` and base URL are used for both capability groups, so the flow does not pick up a second credential halfway through.
 
-The script takes an org domain, its admin email, the assigned TXT name and content, plus toggles for donor receipts, volunteer reminders, and weekly campaign reporting. A successful run shows the state transition:
+The script accepts an organization domain, its administrator email, the assigned TXT name and content, plus settings for donor receipts, volunteer reminders, and weekly campaign reporting. A successful run returns the visible state transition:
 
 ```json
 {
@@ -26,7 +26,7 @@ The script takes an org domain, its admin email, the assigned TXT name and conte
 
 ## The route your app calls
 
-Boot the typed Node service with `npm run dev`, then POST the onboarding form to `http://localhost:3000/onboarding/complete`. Zod validates the body at the edge, enforcing the rule that the admin email must match the domain being proven.
+Start the typed Node service with `npm run dev`, then POST the onboarding form to `http://localhost:3000/onboarding/complete`. Zod checks the body at the request boundary, including the business rule that the administrator email must belong to the domain being proven.
 
 ```bash
 curl -X POST http://localhost:3000/onboarding/complete \
@@ -42,13 +42,13 @@ curl -X POST http://localhost:3000/onboarding/complete \
   }'
 ```
 
-The flow only verifies an existing DNS setup. It won't create or update records because the capability contract has no delete operation. The client decodes Infrai's response envelope before reading HTTP status, turns normal rejections into client responses, and backs off on rate limits.
+The flow only verifies an existing DNS setup; it does not create or update DNS records because the available capability contract has no corresponding delete operation. The client decodes Infrai's response envelope before interpreting the HTTP status, surfaces ordinary request rejections to the route as client responses, and backs off on rate limiting.
 
-The repo assumes the nonprofit domain and its verification TXT already live in the Infrai account. It handles the finish line: ask Infrai to verify the domain, resolve the user, and flag the three nonprofit workflows as configured.
+The repository assumes the nonprofit domain and its verification TXT record are already present in the Infrai account. It owns the completion step: ask Infrai to verify the domain, resolve the matching user, and mark the three nonprofit workflows configured.
 
 ## Check the decision locally
 
-Run `npm test`. The focused test expects DNS lookup, verification, and user lookup in that order, then asserts the result is `ready` with `zone_42` and `user_7`. `npm run typecheck` checks request and response types without dropping build files.
+Run `npm test`. The focused test expects DNS lookup, verification, and user lookup in that order, then asserts the result is `ready` with `zone_42` and `user_7`. `npm run typecheck` checks the request and response types without emitting build files.
 
 ## License
 
@@ -56,7 +56,7 @@ MIT
 
 ## Before this ships: Nonprofit Domain Onboarding Domain Ownership Nonprofit Types
 
-That's the minimal version I ran for a small charity last month. Before you run it for real, note the details below apply to Nonprofit Domain Onboarding Domain Ownership Nonprofit Types.
+That's the minimal version. Before running this for real: The details below apply to Nonprofit Domain Onboarding Domain Ownership Nonprofit Types.
 
 **Account & key**
 
